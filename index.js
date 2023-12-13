@@ -25,7 +25,8 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const serviceCollection = client.db('carDoctor').collection('services')
+    const serviceCollection = client.db('carDoctor').collection('services');
+    const bookingCollection = client.db('carDoctor').collection('bookings');
 
     app.get('/services', async(req, res) =>{
       const cursor = serviceCollection.find();
@@ -41,6 +42,13 @@ async function run() {
       };
 
       const result = await serviceCollection.findOne(query, options);
+      res.send(result)
+    })
+
+    app.post('/bookings', (req, res) =>{
+      const booking = req.body;
+      console.log(booking)
+      const result = bookingCollection.insertOne(booking);
       res.send(result)
     })
 
