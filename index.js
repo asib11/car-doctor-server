@@ -22,6 +22,25 @@ const client = new MongoClient(uri, {
   }
 });
 
+const verifyJWT = (req, res, next) =>{
+  // console.log('hit JWT');
+  // console.log(req.headers.authorization);
+  const authorization = req.headers.authorization ;
+  if(!authorization){
+    return res.status(401).send({error: true, message: 'unauthorize access'});
+  }
+  const token = authorization.split(' ')[1];
+  // console.log(token);
+  jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (error, decoded)=>{
+    if(error){
+      return  res.status(403).send({error: true, message: 'unauthoorize access'})
+    }
+    req.decoded = decoded;
+    next();
+  })
+
+}
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -32,7 +51,7 @@ async function run() {
     app.post('/jwt', (req, res) =>{
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_SECRET_TOKEN, {expiresIn: '1h'});
-      res.send(token);
+      res.send({token});
     })
 
     app.get('/services', async(req, res) =>{
@@ -52,7 +71,8 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/bookings', async(req, res) =>{
+    app.get('/bookings', verifyJWT, async(req, res) =>{
+      // console.log(req.headers.authorization);
       let query = {};
       if(req.query?.email){
         query = {email: req.query.email}
