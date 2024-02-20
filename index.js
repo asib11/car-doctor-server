@@ -57,7 +57,9 @@ async function run() {
     app.get('/services', async(req, res) =>{
       const filter = req.query
       console.log(filter)
-      const query = {}
+      const query = {
+        
+      }
       const options = {
         sort: {
           price: filter.sort ===  "asc"? 1:-1
